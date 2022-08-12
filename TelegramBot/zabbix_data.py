@@ -8,7 +8,6 @@ zapi = ZabbixAPI(ZABBIX_SERVER)
 # Logar na API Zabbix 
 zapi.login(ZABBIX_USER, api_token=ZABBIX_API_TOKEN)
 
-
 # Função para obter histórico de determinado item
 def historico_ultima_hora(id_item):
     # Definir intervalo de tempo
@@ -43,10 +42,12 @@ def historico_ultima_hora(id_item):
                 point["value"],
             )
         )
+    zapi.logout()
     return
 
 # Função para descoberta de problemas
 def problemas_zabbix():
+
     # Obter lista com todos os problemas
     triggers = zapi.trigger.get(
         only_true=1,
@@ -86,8 +87,16 @@ def problemas_zabbix():
             )
     return resultado
 
+# Função para obter lista com hosts
+def get_hosts():
+    resultado = []
+    hosts = zapi.host.get(output=['name'])
+    for h in hosts:
+        resultado.append(h)
+    return resultado
+
 
 if __name__ == '__main__':
-    problemas = problemas_zabbix()
-    for problema in problemas:
-        print(problema)
+    hosts = get_hosts()
+    for host in hosts:
+        print(host)
