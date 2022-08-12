@@ -41,6 +41,17 @@ def echo_all(message):
                     separator=" "
                 ),
                 parse_mode='MarkdownV2')
+    elif re.match(r'^.*host.*$|^.*equipamento.*$', message.text, re.IGNORECASE):
+        hosts = zabbix_data.get_hosts()
+        for host in hosts:
+            bot.send_message(
+                    message.chat.id,
+                    formatting.format_text(
+                        formatting.mbold(host['hostid']),
+                        formatting.mcode(host['name']),
+                        separator=" "
+                    ),
+                    parse_mode='MarkdownV2')
     # Easter Egg
     elif re.match(r'^.*teste.*$', message.text, re.IGNORECASE):
         bot.send_message(
