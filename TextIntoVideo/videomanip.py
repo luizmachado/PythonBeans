@@ -66,7 +66,7 @@ if __name__ == '__main__':
     if not 'output' in kwargs:
         kwargs['output'] = ('videos/result.mov')
     if not 'texto' in kwargs:
-        kwargs['text'] = f'Recorde atingido.\n30.000 tons'
+        kwargs['texto'] = f'Recorde atingido.\n30.000 tons'
 
     #Executar funções para gerar e reproduzir vídeo
     add_text_to_video(kwargs['input'], kwargs['output'], kwargs['texto'])
