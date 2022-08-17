@@ -45,6 +45,38 @@ def historico_ultima_hora(id_item):
     zapi.logout()
     return
 
+# Função para obter histórico de determinado host
+def historico_ultima_hora_host(id_host):
+    # Definir intervalo de tempo
+    time_till = time.mktime(datetime.now().timetuple())
+    time_from = time_till - 60 * 60 * 1  # 1 hora
+
+    # Obter histórico com dados inteiros
+    history = zapi.history.get(
+        hostids=[id_host],
+        time_from=int(time_from),
+        time_till=int(time_till),
+        output="extend",
+        limit="5000",
+    )
+
+    # Se não for encontrado dados inteiros, obter dados ponto flutuante
+    if not len(history):
+        history = zapi.history.get(
+            hostids=[id_host],
+            time_from=time_from,
+            time_till=time_till,
+            output="extend",
+            limit="5000",
+            history=0,
+        )
+
+    # Printar cada ponto de dados
+    for point in history:
+        print(point)
+
+    return
+
 # Função para descoberta de problemas
 def problemas_zabbix():
 
@@ -97,6 +129,4 @@ def get_hosts():
 
 
 if __name__ == '__main__':
-    hosts = get_hosts()
-    for host in hosts:
-        print(host)
+    historico_ultima_hora_host(10460)
