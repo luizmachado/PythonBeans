@@ -5,10 +5,12 @@ from dados_conta import ZABBIX_SERVER, ZABBIX_API_TOKEN, ZABBIX_USER
 
 zapi = ZabbixAPI(ZABBIX_SERVER)
 
-# Logar na API Zabbix 
+# Logar na API Zabbix
 zapi.login(ZABBIX_USER, api_token=ZABBIX_API_TOKEN)
 
 # Função para obter histórico de determinado item
+
+
 def historico_ultima_hora(id_item):
     # Definir intervalo de tempo
     time_till = time.mktime(datetime.now().timetuple())
@@ -46,6 +48,8 @@ def historico_ultima_hora(id_item):
     return
 
 # Função para obter histórico de determinado host
+
+
 def historico_ultima_hora_host(id_host):
     # Definir intervalo de tempo
     time_till = time.mktime(datetime.now().timetuple())
@@ -78,6 +82,8 @@ def historico_ultima_hora_host(id_host):
     return
 
 # Função para descoberta de problemas
+
+
 def problemas_zabbix():
 
     # Obter lista com todos os problemas
@@ -103,7 +109,8 @@ def problemas_zabbix():
     )
     unack_trigger_ids = [t["triggerid"] for t in unack_triggers]
     for t in triggers:
-        t["unacknowledged"] = True if t["triggerid"] in unack_trigger_ids else False
+        t["unacknowledged"] = True if t["triggerid"] \
+            in unack_trigger_ids else False
 
     # Retornar lista com as triggers ativas
     resultado = []
@@ -114,17 +121,20 @@ def problemas_zabbix():
                 "{} -@ {} @{}".format(
                     t["hosts"][0]["host"],
                     t["description"],
-                    "(Não Reconhecido)" if t["unacknowledged"] else "(Reconhecido)",
+                    "(Não Reconhecido)" if t["unacknowledged"]
+                    else "(Reconhecido)",
                 )
             )
     return resultado
 
 # Função para obter lista com hosts
+
+
 def get_hosts():
     resultado = []
     hosts = zapi.host.get(output=['name'])
-    for h in hosts:
-        resultado.append(h)
+    for host in hosts:
+        resultado.append(host)
     return resultado
 
 
