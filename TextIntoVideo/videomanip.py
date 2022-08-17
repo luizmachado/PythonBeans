@@ -1,4 +1,4 @@
-import moviepy.editor as mp
+mport moviepy.editor as mp
 import cv2
 import sys
 
