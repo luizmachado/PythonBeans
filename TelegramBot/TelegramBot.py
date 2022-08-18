@@ -24,6 +24,33 @@ def send_welcome(message):
         f'Seja bem-vindo ao Robô do Integrado ao Zabbix.')
 
 
+@bot.message_handler(commands=['eventos'])
+def view_events_intro(message):
+    msg = bot.send_message(
+        message.chat.id, f'Consulta de eventos nas últimas 24hs\n'
+        f'Informe o id do host que'
+        f' deseja consultar:')
+    bot.register_next_step_handler(msg, view_event2)
+
+
+def view_event2(message):
+    if message.text.isdigit():
+        resultados = zabbix_data.eventos_ultimo_dia_host(message.text)
+        for resultado in resultados:
+            resultado = resultado.split('@')
+            bot.send_message(
+                message.chat.id,
+                formatting.format_text(
+                    formatting.mbold(resultado[0]),
+                    formatting.mcode(resultado[1]),
+                    separator=''
+                ),
+                parse_mode='MarkdownV2')
+    else:
+        bot.send_message(message.chat.id, 'É necessário informar o ID,'
+                         ' Você informou um texto')
+
+
 @bot.message_handler(func=lambda message: True)
 def echo_all(message):
     if re.match(saudacao, message.text, re.IGNORECASE):
