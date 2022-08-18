@@ -1,5 +1,6 @@
 import time
 import pprint
+import re
 from datetime import datetime
 from pyzabbix.api import ZabbixAPI
 from dados_conta import ZABBIX_SERVER, ZABBIX_API_TOKEN, ZABBIX_USER
@@ -156,17 +157,18 @@ def problemas_zabbix():
     return resultado
 
 
-def get_hosts():
+def get_hosts(filtro):
     '''Função para obter lista com hosts'''
     resultado = []
     hosts = zapi.host.get(output=['name'])
     for host in hosts:
-        resultado.append(host)
+        regex_filter = r'^.*' + filtro + '.*$'
+        if re.match(regex_filter, host['name'], re.IGNORECASE):
+            resultado.append(host)
     return resultado
 
 
 if __name__ == '__main__':
-    problemas = problemas_zabbix()
-    for evento in problemas:
-        pp = pprint.PrettyPrinter(indent=4)
-        pp.pprint(evento)
+    hosts = get_hosts('caltins')
+    for host in hosts:
+        print(host)
