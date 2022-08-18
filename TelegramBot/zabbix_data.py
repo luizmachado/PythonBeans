@@ -1,4 +1,5 @@
 import time
+import pprint
 from datetime import datetime
 from pyzabbix.api import ZabbixAPI
 from dados_conta import ZABBIX_SERVER, ZABBIX_API_TOKEN, ZABBIX_USER
@@ -84,8 +85,29 @@ def historico_ultima_hora_host(id_host):
     return resultado
 
 
+def eventos_ultimo_dia_host(id_host):
+    '''Função para obter eventos de determinado host'''
 
+    resultado = []
 
+    events = zapi.event.get(
+        hostids=[id_host],
+        time_from=DAY_AGO,
+        time_till=TIME_NOW,
+        sortfield='clock',
+    )
+    for event in events:
+        resultado.append(
+            "{} - Problema: {} - @ {}".format(
+                datetime.fromtimestamp(
+                    int(event["clock"])).strftime("%x %X"),
+                event["name"],
+                "(Reconhecido)" if event["acknowledged"] == '1'
+                else "(Não Reconhecido)",
+            )
+        )
+
+    return resultado
 
 
 def problemas_zabbix():
@@ -144,4 +166,7 @@ def get_hosts():
 
 
 if __name__ == '__main__':
-    historico_ultima_hora_host(10460)
+    problemas = problemas_zabbix()
+    for evento in problemas:
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(evento)
