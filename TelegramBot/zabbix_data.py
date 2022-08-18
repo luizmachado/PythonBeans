@@ -13,7 +13,7 @@ zapi.login(ZABBIX_USER, api_token=ZABBIX_API_TOKEN)
 # Definir período
 TIME_NOW = time.mktime(datetime.now().timetuple())
 HOUR_AGO = TIME_NOW - 60 * 60 * 1  # 1 hora
-DAY_AGO = TIME_NOW - 60 * 60 * 24  # 1 hora
+DAY_AGO = TIME_NOW - 60 * 60 * 24  # 1 dia
 
 
 def historico_ultima_hora(id_item):
