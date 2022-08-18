@@ -51,6 +51,19 @@ def view_event2(message):
                          ' Você informou um texto')
 
 
+def filter_host(message):
+    hosts = zabbix_data.get_hosts(message.text)
+    for host in hosts:
+        bot.send_message(
+            message.chat.id,
+            formatting.format_text(
+                formatting.mbold(host['hostid']),
+                formatting.mcode(host['name']),
+                separator=" "
+            ),
+            parse_mode='MarkdownV2')
+
+
 @bot.message_handler(func=lambda message: True)
 def echo_all(message):
     if re.match(saudacao, message.text, re.IGNORECASE):
@@ -73,16 +86,9 @@ def echo_all(message):
                 parse_mode='MarkdownV2')
     elif re.match(r'^.*host.*$|^.*equipamento.*$', message.text,
                   re.IGNORECASE):
-        hosts = zabbix_data.get_hosts()
-        for host in hosts:
-            bot.send_message(
-                message.chat.id,
-                formatting.format_text(
-                    formatting.mbold(host['hostid']),
-                    formatting.mcode(host['name']),
-                    separator=" "
-                ),
-                parse_mode='MarkdownV2')
+        msg = bot.send_message(message.chat.id, 'Informe algum valor para'
+                         'filtrar hosts')
+        bot.register_next_step_handler(msg, filter_host)
     # Easter Egg
     elif re.match(r'^.*teste.*$', message.text, re.IGNORECASE):
         bot.send_message(
