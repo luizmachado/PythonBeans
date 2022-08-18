@@ -8,7 +8,6 @@ zapi = ZabbixAPI(ZABBIX_SERVER)
 # Logar na API Zabbix
 zapi.login(ZABBIX_USER, api_token=ZABBIX_API_TOKEN)
 
-# Função para obter histórico de determinado item
 
 # Definir período
 TIME_NOW = time.mktime(datetime.now().timetuple())
@@ -17,6 +16,7 @@ DAY_AGO = TIME_NOW - 60 * 60 * 24  # 1 hora
 
 
 def historico_ultima_hora(id_item):
+    '''Função para obter histórico de determinado item'''
 
     resultado = []
 
@@ -53,6 +53,7 @@ def historico_ultima_hora(id_item):
 
 
 def historico_ultima_hora_host(id_host):
+    '''Função para obter histórico de determinado host'''
 
     resultado = []
 
@@ -88,6 +89,7 @@ def historico_ultima_hora_host(id_host):
 
 
 def problemas_zabbix():
+    '''Função para descoberta de problemas'''
 
     resultado = []
 
@@ -112,30 +114,28 @@ def problemas_zabbix():
         selectHosts=["host"],
         withLastEventUnacknowledged=1,
     )
-    unack_trigger_ids = [t["triggerid"] for t in unack_triggers]
-    for t in triggers:
-        t["unacknowledged"] = True if t["triggerid"] \
+    unack_trigger_ids = [trigger["triggerid"] for trigger in unack_triggers]
+    for trigger in triggers:
+        trigger["unacknowledged"] = True if trigger["triggerid"] \
             in unack_trigger_ids else False
 
     # Retornar lista com as triggers ativas
-    resultado = []
-    for t in triggers:
-        if int(t["value"]) == 1:
+    for trigger in triggers:
+        if int(trigger["value"]) == 1:
             # Resultado com marcador '@' pra posterior marcação
             resultado.append(
                 "{} -@ {} @{}".format(
-                    t["hosts"][0]["host"],
-                    t["description"],
-                    "(Não Reconhecido)" if t["unacknowledged"]
+                    trigger["hosts"][0]["host"],
+                    trigger["description"],
+                    "(Não Reconhecido)" if trigger["unacknowledged"]
                     else "(Reconhecido)",
                 )
             )
     return resultado
 
-# Função para obter lista com hosts
-
 
 def get_hosts():
+    '''Função para obter lista com hosts'''
     resultado = []
     hosts = zapi.host.get(output=['name'])
     for host in hosts:
