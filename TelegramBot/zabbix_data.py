@@ -10,17 +10,21 @@ zapi.login(ZABBIX_USER, api_token=ZABBIX_API_TOKEN)
 
 # Função para obter histórico de determinado item
 
+# Definir período
+TIME_NOW = time.mktime(datetime.now().timetuple())
+HOUR_AGO = TIME_NOW - 60 * 60 * 1  # 1 hora
+DAY_AGO = TIME_NOW - 60 * 60 * 24  # 1 hora
+
 
 def historico_ultima_hora(id_item):
-    # Definir intervalo de tempo
-    time_till = time.mktime(datetime.now().timetuple())
-    time_from = time_till - 60 * 60 * 1  # 1 hora
+
+    resultado = []
 
     # Obter histórico com dados inteiros
     history = zapi.history.get(
         itemids=[id_item],
-        time_from=int(time_from),
-        time_till=int(time_till),
+        time_from=int(HOUR_AGO),
+        time_till=int(TIME_NOW),
         output="extend",
         limit="5000",
     )
@@ -29,8 +33,8 @@ def historico_ultima_hora(id_item):
     if not len(history):
         history = zapi.history.get(
             itemids=[id_item],
-            time_from=time_from,
-            time_till=time_till,
+            time_from=HOUR_AGO,
+            time_till=TIME_NOW,
             output="extend",
             limit="5000",
             history=0,
@@ -38,28 +42,25 @@ def historico_ultima_hora(id_item):
 
     # Printar cada ponto de dados
     for point in history:
-        print(
+        resultado.append(
             "{}: {}".format(
                 datetime.fromtimestamp(int(point["clock"])).strftime("%x %X"),
                 point["value"],
             )
         )
     zapi.logout()
-    return
-
-# Função para obter histórico de determinado host
+    return resultado
 
 
 def historico_ultima_hora_host(id_host):
-    # Definir intervalo de tempo
-    time_till = time.mktime(datetime.now().timetuple())
-    time_from = time_till - 60 * 60 * 1  # 1 hora
+
+    resultado = []
 
     # Obter histórico com dados inteiros
     history = zapi.history.get(
         hostids=[id_host],
-        time_from=int(time_from),
-        time_till=int(time_till),
+        time_from=int(HOUR_AGO),
+        time_till=int(TIME_NOW),
         output="extend",
         limit="5000",
     )
@@ -68,8 +69,8 @@ def historico_ultima_hora_host(id_host):
     if not len(history):
         history = zapi.history.get(
             hostids=[id_host],
-            time_from=time_from,
-            time_till=time_till,
+            time_from=HOUR_AGO,
+            time_till=TIME_NOW,
             output="extend",
             limit="5000",
             history=0,
@@ -77,14 +78,18 @@ def historico_ultima_hora_host(id_host):
 
     # Printar cada ponto de dados
     for point in history:
-        print(point)
+        resultado.append(point)
 
-    return
+    return resultado
 
-# Função para descoberta de problemas
+
+
+
 
 
 def problemas_zabbix():
+
+    resultado = []
 
     # Obter lista com todos os problemas
     triggers = zapi.trigger.get(
