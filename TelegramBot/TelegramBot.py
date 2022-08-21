@@ -17,14 +17,20 @@ frases_evasivas = ['La pregunta ?', 'Não fui treinado pra isso',
 bot = telebot.TeleBot(BOT_TOKEN, parse_mode=None)
 
 
-@bot.message_handler(commands=['start', 'ajuda'])
-def send_welcome(message):
+def welcome(message):
     bot.send_message(
-        message.chat.id, f'Olá {message.chat.first_name} muito doido ! '
-        f'Seja bem-vindo ao Robô do Integrado ao Zabbix.')
+        message.chat.id, f'Iae {message.chat.first_name} muito doido, '
+        f'tudo sussa ?\n O que você deseja ?')
+    bot.send_message(message.chat.id,
+                     formatting.format_text(
+                         formatting.escape_markdown('Você pode pesquisar por'),
+                         formatting.mbold('"hosts", "incidentes" e "eventos"'),
+                         formatting.escape_markdown('sinta-se à vontade.'),
+                         separator=" "
+                     ),
+                     parse_mode='MarkdownV2')
 
 
-@bot.message_handler(commands=['eventos'])
 def view_events_intro(message):
     msg = bot.send_message(
         message.chat.id, f'Consulta de eventos nas últimas 24hs\n'
@@ -64,31 +70,45 @@ def filter_host(message):
             parse_mode='MarkdownV2')
 
 
+def view_problems(message):
+    problemas = zabbix_data.problemas_zabbix()
+    for problema in problemas:
+        problema = problema.split('@')
+        bot.send_message(
+            message.chat.id,
+            formatting.format_text(
+                formatting.mbold(problema[0]),
+                formatting.munderline(problema[1]),
+                formatting.mcode(problema[2]),
+                separator=" "
+            ),
+            parse_mode='MarkdownV2')
+
+
+@bot.message_handler(commands=['start', 'ajuda', 'help'])
+def send_welcome(message):
+    welcome(message)
+
+
 @bot.message_handler(func=lambda message: True)
 def echo_all(message):
     if re.match(saudacao, message.text, re.IGNORECASE):
-        bot.send_message(
-            message.chat.id, f'Iae {message.chat.first_name} muito doido, '
-            f'tudo sussa ?\n O que você deseja ?')
+        welcome(message)
+
     elif re.match(r'^.*problema.*$|^.*incidente.*$', message.text,
                   re.IGNORECASE):
-        problemas = zabbix_data.problemas_zabbix()
-        for problema in problemas:
-            problema = problema.split('@')
-            bot.send_message(
-                message.chat.id,
-                formatting.format_text(
-                    formatting.mbold(problema[0]),
-                    formatting.munderline(problema[1]),
-                    formatting.mcode(problema[2]),
-                    separator=" "
-                ),
-                parse_mode='MarkdownV2')
+        view_problems(message)
+
     elif re.match(r'^.*host.*$|^.*equipamento.*$', message.text,
                   re.IGNORECASE):
         msg = bot.send_message(message.chat.id, 'Informe algum valor para'
-                         'filtrar hosts')
+                               ' filtrar hosts')
         bot.register_next_step_handler(msg, filter_host)
+
+    elif re.match(r'^.*evento.*$', message.text,
+                  re.IGNORECASE):
+        view_events_intro(message)
+
     # Easter Egg
     elif re.match(r'^.*teste.*$', message.text, re.IGNORECASE):
         bot.send_message(
