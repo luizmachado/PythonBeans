@@ -65,15 +65,22 @@ def view_event2(message):
 
 def filter_host(message):
     hosts = zabbix_data.get_hosts(message.text)
-    for host in hosts:
+    if hosts:
+        for host in hosts:
+            bot.send_message(
+                message.chat.id,
+                formatting.format_text(
+                    formatting.mbold(host['hostid']),
+                    formatting.mcode(host['name']),
+                    separator=" "
+                ),
+                parse_mode='MarkdownV2')
+    else:
         bot.send_message(
             message.chat.id,
-            formatting.format_text(
-                formatting.mbold(host['hostid']),
-                formatting.mcode(host['name']),
-                separator=" "
-            ),
-            parse_mode='MarkdownV2')
+            f'Não foi encontrado nenhum host '
+            f'com o termo informado')
+
 
 
 def view_problems(message):
