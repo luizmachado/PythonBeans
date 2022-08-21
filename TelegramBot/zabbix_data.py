@@ -147,7 +147,8 @@ def problemas_zabbix():
         if int(trigger["value"]) == 1:
             # Resultado com marcador '@' pra posterior marcação
             resultado.append(
-                "{} -@ {} @{}".format(
+                "({}) {} -@ {} @{}".format(
+                    trigger["hosts"][0]["hostid"],
                     trigger["hosts"][0]["host"],
                     trigger["description"],
                     "(Não Reconhecido)" if trigger["unacknowledged"]
