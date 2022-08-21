@@ -42,16 +42,22 @@ def view_events_intro(message):
 def view_event2(message):
     if message.text.isdigit():
         resultados = zabbix_data.eventos_ultimo_dia_host(message.text)
-        for resultado in resultados:
-            resultado = resultado.split('@')
+        if resultados:
+            for resultado in resultados:
+                resultado = resultado.split('@')
+                bot.send_message(
+                    message.chat.id,
+                    formatting.format_text(
+                        formatting.mbold(resultado[0]),
+                        formatting.mcode(resultado[1]),
+                        separator=''
+                    ),
+                    parse_mode='MarkdownV2')
+        else:
             bot.send_message(
                 message.chat.id,
-                formatting.format_text(
-                    formatting.mbold(resultado[0]),
-                    formatting.mcode(resultado[1]),
-                    separator=''
-                ),
-                parse_mode='MarkdownV2')
+                f'Não foi encontrado nenhum evento '
+                f'recente para o host informado.')
     else:
         bot.send_message(message.chat.id, 'É necessário informar o ID,'
                          ' Você informou um texto')
