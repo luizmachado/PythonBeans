@@ -92,11 +92,14 @@ def filter_host(message):
                     separator=" "
                 ),
                 parse_mode='MarkdownV2')
+        return hosts
+
     else:
         bot.send_message(
             message.chat.id,
             f'Não foi encontrado nenhum host '
             f'com o termo informado')
+        return
 
 
 def view_problems(message):
@@ -117,14 +120,32 @@ def view_problems(message):
 def view_graph(message):
     msg = bot.send_message(
         message.chat.id, f'Visualize os gráficos  do host desejado.\n'
-        f'Informe o id do host que'
+        f'Informe um termo para pesquisar por hosts que'
         f' deseja consultar:')
     bot.register_next_step_handler(msg, view_graph2)
 
 
 def view_graph2(message):
+    hosts = filter_host(message)
+    if not hosts:
+        try_again(message)
+    elif len(hosts) == 1:
+        graficos = zabbix_data.get_graphs(hosts[0]['hostid'])
+        for grafico in graficos:
+            get_graph(grafico['graphid'])
+            image = open('./imagem.png', 'rb')
+            bot.send_photo(message.chat.id, image)
+    else:
+        msg = bot.send_message(message.chat.id,
+                               f'Foi encontrado diversos host, escolha algum'
+                               ' informando o id:')
+        bot.register_next_step_handler(msg, view_graph3)
+
+
+
+def view_graph3(message):
     if message.text.isdigit():
-        graficos = zabbix_data.list_graphs(message.text)
+        graficos = zabbix_data.get_graphs(message.text)
         for grafico in graficos:
             get_graph(grafico['graphid'])
             image = open('./imagem.png', 'rb')
