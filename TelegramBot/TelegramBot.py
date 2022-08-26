@@ -25,7 +25,23 @@ def welcome(message):
     bot.send_message(message.chat.id,
                      formatting.format_text(
                          formatting.escape_markdown('Você pode pesquisar por'),
-                         formatting.mbold('"hosts", "incidentes" e "eventos"'),
+                         formatting.mbold(
+                             '"hosts", "incidentes", "eventos" e gráficos'),
+                         formatting.escape_markdown('sinta-se à vontade.'),
+                         separator=" "
+                     ),
+                     parse_mode='MarkdownV2')
+
+
+def try_again(message):
+    bot.send_message(
+        message.chat.id, f'{message.chat.first_name} muito doido, '
+        f'tente novamente !\n O que você deseja ?')
+    bot.send_message(message.chat.id,
+                     formatting.format_text(
+                         formatting.escape_markdown('Você pode pesquisar por'),
+                         formatting.mbold(
+                             '"hosts", "incidentes", "eventos" e "gráficos"'),
                          formatting.escape_markdown('sinta-se à vontade.'),
                          separator=" "
                      ),
