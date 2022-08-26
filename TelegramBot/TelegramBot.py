@@ -26,8 +26,7 @@ def welcome(message):
                      formatting.format_text(
                          formatting.escape_markdown('Você pode pesquisar por'),
                          formatting.mbold(
-                             '"hosts", "incidentes", "eventos" e gráficos'),
-                         formatting.escape_markdown('sinta-se à vontade.'),
+                             '"hosts", "incidentes", "eventos" e "gráficos"...'),
                          separator=" "
                      ),
                      parse_mode='MarkdownV2')
@@ -41,8 +40,7 @@ def try_again(message):
                      formatting.format_text(
                          formatting.escape_markdown('Você pode pesquisar por'),
                          formatting.mbold(
-                             '"hosts", "incidentes", "eventos" e "gráficos"'),
-                         formatting.escape_markdown('sinta-se à vontade.'),
+                             '"hosts", "incidentes", "eventos" e "gráficos"...'),
                          separator=" "
                      ),
                      parse_mode='MarkdownV2')
@@ -57,6 +55,30 @@ def view_events_intro(message):
 
 
 def view_event2(message):
+    hosts = filter_host(message)
+    if not hosts:
+        try_again(message)
+    elif len(hosts) == 1:
+        resultados = zabbix_data.eventos_ultimo_dia_host(hosts[0]['hostid'])
+        if resultados:
+            for resultado in resultados:
+                resultado = resultado.split('@')
+                bot.send_message(
+                    message.chat.id,
+                    formatting.format_text(
+                        formatting.mbold(resultado[0]),
+                        formatting.mcode(resultado[1]),
+                        separator=''
+                    ),
+                    parse_mode='MarkdownV2')
+    else:
+        msg = bot.send_message(message.chat.id,
+                               f'Foi encontrado diversos host, escolha algum'
+                               ' informando o id:')
+        bot.register_next_step_handler(msg, view_event3)
+
+
+def view_event3(message):
     if message.text.isdigit():
         resultados = zabbix_data.eventos_ultimo_dia_host(message.text)
         if resultados:
@@ -75,9 +97,11 @@ def view_event2(message):
                 message.chat.id,
                 f'Não foi encontrado nenhum evento '
                 f'recente para o host informado.')
+            try_again(message)
     else:
         bot.send_message(message.chat.id, 'É necessário informar o ID,'
                          ' Você informou um texto')
+        try_again(message)
 
 
 def filter_host(message):
