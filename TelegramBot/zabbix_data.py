@@ -168,8 +168,17 @@ def get_hosts(filtro):
             resultado.append(host)
     return resultado
 
+def get_graphs(host_id):
+    resultado = []
+    graphs = zapi.graph.get(
+            hostids=host_id,
+            )
+    for graph in graphs:
+        resultado.append(graph)
+    return resultado
+
 
 if __name__ == '__main__':
-    hosts = get_hosts('caltins')
-    for host in hosts:
-        print(host)
+    graphs = get_graphs([10646, 10595,])
+    for graph in graphs:
+        print(graph)
