@@ -3,6 +3,7 @@ from dados_conta import BOT_TOKEN
 import telebot
 from telebot import formatting
 import zabbix_data
+from zabbix_graph import get_graph
 import re
 import random
 
@@ -96,6 +97,19 @@ def view_problems(message):
                 separator=" "
             ),
             parse_mode='MarkdownV2')
+def view_graph(message):
+    msg = bot.send_message(
+        message.chat.id, f'Consulte o grafico desejado\n'
+        f'Informe o id do grafico que'
+        f' deseja consultar:')
+    bot.register_next_step_handler(msg, view_graph2)
+
+
+def view_graph2(message):
+    get_graph(message.text)
+    image = open('./imagem.png', 'rb')
+    bot.send_photo(message.chat.id, image)
+
 
 
 @bot.message_handler(commands=['start', 'ajuda', 'help'])
@@ -121,6 +135,10 @@ def echo_all(message):
     elif re.match(r'^.*evento.*$', message.text,
                   re.IGNORECASE):
         view_events_intro(message)
+
+    elif re.match(r'^.*grafico.*$|^.*gráfico.*$', message.text,
+                  re.IGNORECASE):
+        view_graph(message)
 
     # Easter Egg
     elif re.match(r'^.*teste.*$', message.text, re.IGNORECASE):
