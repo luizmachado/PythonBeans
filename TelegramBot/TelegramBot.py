@@ -83,7 +83,6 @@ def filter_host(message):
             f'com o termo informado')
 
 
-
 def view_problems(message):
     problemas = zabbix_data.problemas_zabbix()
     for problema in problemas:
@@ -97,19 +96,26 @@ def view_problems(message):
                 separator=" "
             ),
             parse_mode='MarkdownV2')
+
+
 def view_graph(message):
     msg = bot.send_message(
-        message.chat.id, f'Consulte o grafico desejado\n'
-        f'Informe o id do grafico que'
+        message.chat.id, f'Visualize os gráficos  do host desejado.\n'
+        f'Informe o id do host que'
         f' deseja consultar:')
     bot.register_next_step_handler(msg, view_graph2)
 
 
 def view_graph2(message):
-    get_graph(message.text)
-    image = open('./imagem.png', 'rb')
-    bot.send_photo(message.chat.id, image)
-
+    if message.text.isdigit():
+        graficos = zabbix_data.list_graphs(message.text)
+        for grafico in graficos:
+            get_graph(grafico['graphid'])
+            image = open('./imagem.png', 'rb')
+            bot.send_photo(message.chat.id, image)
+    else:
+        bot.send_message(message.chat.id, 'É necessário informar o ID,'
+                         ' Você informou um texto')
 
 
 @bot.message_handler(commands=['start', 'ajuda', 'help'])
