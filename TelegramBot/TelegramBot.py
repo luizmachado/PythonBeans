@@ -301,4 +301,11 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    mensageiro_thread = threading.Thread(target=mensageiro_srv)
+    main_thread = threading.Thread(target=main)
+    mensageiro_thread.start()
+    main_thread.start()
+    mensageiro_thread.join()
+    print('Iniciando')
+    main_thread.join()
+    print('Terminando')
