@@ -4,8 +4,12 @@ import telebot
 from telebot import formatting
 import zabbix_data
 from zabbix_graph import get_graph
+from datetime import datetime, timedelta, date
+import time
+import threading
 import re
 import random
+import os
 
 saudacao = r'bom dia.*$|oi.*$|ola.*$|boa tarde.*$|boa noite.*$|olá.*$|oie.*$'
 frases_evasivas = ['La pregunta ?', 'Não fui treinado pra isso',
@@ -13,6 +17,8 @@ frases_evasivas = ['La pregunta ?', 'Não fui treinado pra isso',
                    'Não sou tão inteligente assim',
                    'Você já experimentou perguntar ao google ?',
                    'Você fala coisas difíceis cara']
+
+cadastros = []
 
 
 bot = telebot.TeleBot(BOT_TOKEN, parse_mode=None)
@@ -166,7 +172,6 @@ def view_graph2(message):
         bot.register_next_step_handler(msg, view_graph3)
 
 
-
 def view_graph3(message):
     if message.text.isdigit():
         graficos = zabbix_data.get_graphs(message.text)
@@ -182,6 +187,31 @@ def view_graph3(message):
 @bot.message_handler(commands=['start', 'ajuda', 'help'])
 def send_welcome(message):
     welcome(message)
+
+
+def salvar_registro():
+    arquivo = open('cadastro.txt', 'w')
+    for cad in cadastros:
+        arquivo.write(str(cad) + '\n')
+    arquivo.close()
+
+
+def carregar_registros():
+    global cadastros
+    if os.path.exists('cadastro.txt'):
+        arquivo = open('cadastro.txt', 'r')
+        for cad in arquivo.readlines():
+            cadastros.append(int(cad.replace('\n', '')))
+
+
+def registra(message):
+    if message.chat.id in cadastros:
+        bot.send_message(message.chat.id, 'Você já está inscrito')
+        return
+
+    cadastros.append(message.chat.id)
+    salvar_registro()
+    bot.send_message(message.chat.id, 'Cadastro realizado com sucesso !')
 
 
 @bot.message_handler(func=lambda message: True)
@@ -206,6 +236,10 @@ def echo_all(message):
     elif re.match(r'^.*grafico.*$|^.*gráfico.*$', message.text,
                   re.IGNORECASE):
         view_graph(message)
+
+    elif re.match(r'^.*cadastr.*$|^.*registr.*$', message.text,
+                  re.IGNORECASE):
+        registra(message)
 
     # Easter Egg
     elif re.match(r'^.*teste.*$', message.text, re.IGNORECASE):
