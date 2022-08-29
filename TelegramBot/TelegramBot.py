@@ -5,6 +5,7 @@ from telebot import formatting
 import zabbix_data
 from zabbix_graph import get_graph
 from datetime import datetime, timedelta, date
+import zmq
 import time
 import threading
 import re
@@ -215,26 +216,34 @@ def registra(message):
 
 
 def envia_problemas():
+    global thread_msg
     for cad in cadastros:
-        problemas = zabbix_data.problemas_zabbix()
-        for problema in problemas:
-            problema = problema.split('@')
-            bot.send_message(
-                cad,
-                formatting.format_text(
-                    formatting.mbold(problema[0]),
-                    formatting.munderline(problema[1]),
-                    formatting.mcode(problema[2]),
-                    separator=" "
-                ),
-                parse_mode='MarkdownV2')
+        if thread_msg:
+            for thread in thread_msg:
+                bot.send_message(cad, thread)
+    thread_msg = []
     agendar_processamento()
 
 
 def agendar_processamento():
     global sub_timer
-    sub_timer = threading.Timer(43200.0, envia_problemas)
+    sub_timer = threading.Timer(120.0, envia_problemas)
     sub_timer.start()
+
+def mensageiro_srv():
+    global thread_msg
+    thread_msg = []
+    context = zmq.Context()
+    socket = context.socket(zmq.REP)
+    socket.bind('tcp://*:5555')
+
+    while True:
+        # Aguardando requisição
+        msg = socket.recv()
+        thread_msg.append(msg)
+        print(f'{thread_msg}')
+        time.sleep(1)
+        socket.send_string(f'{thread_msg}')
 
 
 
