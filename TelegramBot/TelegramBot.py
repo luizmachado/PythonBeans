@@ -214,6 +214,30 @@ def registra(message):
     bot.send_message(message.chat.id, 'Cadastro realizado com sucesso !')
 
 
+def envia_problemas():
+    for cad in cadastros:
+        problemas = zabbix_data.problemas_zabbix()
+        for problema in problemas:
+            problema = problema.split('@')
+            bot.send_message(
+                cad,
+                formatting.format_text(
+                    formatting.mbold(problema[0]),
+                    formatting.munderline(problema[1]),
+                    formatting.mcode(problema[2]),
+                    separator=" "
+                ),
+                parse_mode='MarkdownV2')
+    agendar_processamento()
+
+
+def agendar_processamento():
+    global sub_timer
+    sub_timer = threading.Timer(43200.0, envia_problemas)
+    sub_timer.start()
+
+
+
 @bot.message_handler(func=lambda message: True)
 def echo_all(message):
     if re.match(saudacao, message.text, re.IGNORECASE):
@@ -253,4 +277,19 @@ def echo_all(message):
         bot.reply_to(message, random.choice(frases_evasivas))
 
 
-bot.infinity_polling()
+def main():
+    carregar_registros()
+    agendar_processamento()
+
+    while True:
+        try:
+            bot.infinity_polling()
+
+        except Exception as e:
+            print(f'Erro no telebot: {e}')
+            bot.stop_polling()
+            time.sleep(60)
+
+
+if __name__ == '__main__':
+    main()
