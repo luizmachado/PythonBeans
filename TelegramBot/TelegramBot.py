@@ -73,8 +73,8 @@ def view_event2(message):
                 bot.send_message(
                     message.chat.id,
                     formatting.format_text(
-                        formatting.mbold(resultado[0]),
-                        formatting.mcode(resultado[1]),
+                        formatting.mcode(resultado[0]),
+                        formatting.mbold(resultado[1]),
                         separator=''
                     ),
                     parse_mode='MarkdownV2')
@@ -94,8 +94,8 @@ def view_event3(message):
                 bot.send_message(
                     message.chat.id,
                     formatting.format_text(
-                        formatting.mbold(resultado[0]),
-                        formatting.mcode(resultado[1]),
+                        formatting.mcode(resultado[0]),
+                        formatting.mbold(resultado[1]),
                         separator=''
                     ),
                     parse_mode='MarkdownV2')
@@ -118,8 +118,8 @@ def filter_host(message):
             bot.send_message(
                 message.chat.id,
                 formatting.format_text(
-                    formatting.mbold(host['hostid']),
-                    formatting.mcode(host['name']),
+                    formatting.mbold(host['name']),
+                    formatting.mcode(host['hostid']),
                     separator=" "
                 ),
                 parse_mode='MarkdownV2')
